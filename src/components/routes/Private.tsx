@@ -1,6 +1,8 @@
 import { FC } from "react";
 import { Navigate } from "react-router-dom";
 
+import Header from "../common/Header";
+
 import { useAuthContext } from "../../context/AuthContext";
 
 interface IProps {
@@ -10,7 +12,14 @@ interface IProps {
 const Private: FC<IProps> = ({ component: Component }) => {
 	const { auth } = useAuthContext();
 
-	return auth.email ? <Component /> : <Navigate to="/" />;
+	return auth.email ? (
+		<>
+			<Header />
+			<Component />
+		</>
+	) : (
+		<Navigate to="/" />
+	);
 };
 
 export default Private;

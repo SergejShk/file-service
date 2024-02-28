@@ -6,7 +6,6 @@ import Loader from "../common/Loader";
 
 import FolderForm from "./FolderForm";
 
-// import { useFoldersByUser } from "../../hooks/mutations/folders/useFoldersByUserId";
 import { useFoldersByParent } from "../../hooks/mutations/folders/useGetFoldersByParent";
 import { useNewFolder } from "../../hooks/mutations/folders/useNewFolder";
 
@@ -26,25 +25,8 @@ const Folders: FC = () => {
 		return 0;
 	}, [parentFodersIds]);
 
-	// const {
-	// 	data: foldersByUser,
-	// 	isFetching: isFetchingFoldersByUser,
-	// 	refetch: refetchByUser,
-	// } = useFoldersByUser();
 	const { data: foldersByParent, isFetching: isFetchingFoldersByParent } = useFoldersByParent(parentId);
 	const { mutate: createNewFolder, data: newFolder, isPending: isPendingNewFolder } = useNewFolder();
-
-	// useEffect(() => {
-	// 	if (!foldersByUser?.data) return;
-
-	// 	setFolders(foldersByUser.data);
-	// }, [foldersByUser]);
-
-	// useEffect(() => {
-	// 	if (parentFodersIds.length > 0) return;
-
-	// 	refetchByUser();
-	// }, [parentFodersIds, refetchByUser]);
 
 	useEffect(() => {
 		if (!foldersByParent?.data) return;
@@ -70,9 +52,7 @@ const Folders: FC = () => {
 		setParentFoldersIds((prev) => [...prev, folderId]);
 	};
 
-	const isFetchingFolders =
-		// isFetchingFoldersByUser &&
-		isFetchingFoldersByParent;
+	const isFetchingFolders = isFetchingFoldersByParent;
 	const hasFolders = folders.length > 0 && !isFetchingFolders;
 
 	return (

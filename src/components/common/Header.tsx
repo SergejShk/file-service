@@ -17,9 +17,9 @@ const Header: FC = () => {
 			<Container>
 				<Logo>
 					<svg width="30" height="30">
-						<use xlinkHref="/icons/sprite.svg#file" />
+						<use xlinkHref="/icons/sprite.svg#logo" />
 					</svg>
-					<p>File System</p>
+					<Title>File System</Title>
 				</Logo>
 				<LogOutBtn type="button" onClick={handleLogOutClick} disabled={isPending}>
 					Log out
@@ -34,8 +34,7 @@ export default Header;
 const HeaderStyled = styled.header`
 	background-color: #4c758b;
 	color: #fff;
-	font-size: 18px;
-	font-weight: 500;
+
 	padding: 20px 0;
 `;
 
@@ -43,6 +42,11 @@ const Logo = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 4px;
+`;
+
+const Title = styled.h1`
+	font-size: 20px;
+	font-weight: 500;
 `;
 
 const LogOutBtn = styled.button`

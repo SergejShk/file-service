@@ -1,10 +1,11 @@
+import { ReactNode } from "react";
 import { FieldError, FieldValues, Path, RegisterOptions, UseFormRegister } from "react-hook-form";
 import styled from "styled-components";
 
 type InputProps<TFormValues extends FieldValues> = {
 	name: Path<TFormValues>;
 	type: string;
-	label?: string;
+	label?: string | ReactNode;
 	placeholder: string;
 	register?: UseFormRegister<TFormValues>;
 	rules?: RegisterOptions;

@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
 import Modal from "../common/Modal";
@@ -6,24 +6,51 @@ import Loader from "../common/Loader";
 
 import FolderForm from "./FolderForm";
 
-import { useFoldersByUser } from "../../hooks/mutations/folders/useFoldersByUserId";
+// import { useFoldersByUser } from "../../hooks/mutations/folders/useFoldersByUserId";
+import { useFoldersByParent } from "../../hooks/mutations/folders/useGetFoldersByParent";
 import { useNewFolder } from "../../hooks/mutations/folders/useNewFolder";
 
 import { EModal } from "../../interfaces/common";
 import { IFolder, IFolderFormValues } from "../../interfaces/folders";
 
 const Folders: FC = () => {
-	const { data: foldersByUser, isFetching: isFetchingFoldersByUser } = useFoldersByUser();
-	const { mutate: createNewFolder, data: newFolder, isPending: isPendingNewFolder } = useNewFolder();
-
 	const [folders, setFolders] = useState<IFolder[]>([]);
+	const [parentFodersIds, setParentFoldersIds] = useState<number[]>([]);
 	const [modal, setModal] = useState<EModal | null>(null);
 
-	useEffect(() => {
-		if (!foldersByUser?.data) return;
+	const parentId = useMemo(() => {
+		if (parentFodersIds.length > 0) {
+			return parentFodersIds[parentFodersIds.length - 1];
+		}
 
-		setFolders(foldersByUser.data);
-	}, [foldersByUser]);
+		return 0;
+	}, [parentFodersIds]);
+
+	// const {
+	// 	data: foldersByUser,
+	// 	isFetching: isFetchingFoldersByUser,
+	// 	refetch: refetchByUser,
+	// } = useFoldersByUser();
+	const { data: foldersByParent, isFetching: isFetchingFoldersByParent } = useFoldersByParent(parentId);
+	const { mutate: createNewFolder, data: newFolder, isPending: isPendingNewFolder } = useNewFolder();
+
+	// useEffect(() => {
+	// 	if (!foldersByUser?.data) return;
+
+	// 	setFolders(foldersByUser.data);
+	// }, [foldersByUser]);
+
+	// useEffect(() => {
+	// 	if (parentFodersIds.length > 0) return;
+
+	// 	refetchByUser();
+	// }, [parentFodersIds, refetchByUser]);
+
+	useEffect(() => {
+		if (!foldersByParent?.data) return;
+
+		setFolders(foldersByParent.data);
+	}, [foldersByParent]);
 
 	useEffect(() => {
 		if (!newFolder?.data) return;
@@ -33,24 +60,34 @@ const Folders: FC = () => {
 	}, [newFolder]);
 
 	const onModalNew = () => setModal(EModal.New);
-
 	const onModalClose = () => setModal(null);
 
 	const createFolder = (formValues: IFolderFormValues) => {
-		createNewFolder({ ...formValues });
+		createNewFolder({ ...formValues, parentId: parentId || undefined });
 	};
 
-	const hasFolders = folders.length > 0 && !isFetchingFoldersByUser;
+	const onFolderClick = (folderId: number) => {
+		setParentFoldersIds((prev) => [...prev, folderId]);
+	};
+
+	const isFetchingFolders =
+		// isFetchingFoldersByUser &&
+		isFetchingFoldersByParent;
+	const hasFolders = folders.length > 0 && !isFetchingFolders;
 
 	return (
 		<FoldersStyled>
+			<button type="button">
+				<Title>Folders</Title>
+			</button>
+
 			<FoldersList>
-				{isFetchingFoldersByUser && <Loader />}
+				{isFetchingFolders && <Loader />}
 
 				{hasFolders &&
 					folders.map((folder) => (
 						<FoldersItem key={folder.id}>
-							<Button type="button" onClick={onModalNew}>
+							<Button type="button" onClick={() => onFolderClick(folder.id)}>
 								<Icon width="50" height="50">
 									<use xlinkHref="/icons/sprite.svg#folder" />
 								</Icon>
@@ -83,6 +120,11 @@ export default Folders;
 
 const FoldersStyled = styled.div`
 	width: 100%;
+	padding: 20px 0;
+`;
+
+const Title = styled.h2`
+	color: #4c758b;
 `;
 
 const FoldersList = styled.ul`

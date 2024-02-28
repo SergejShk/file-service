@@ -14,18 +14,18 @@ import { IFolder, IFolderFormValues } from "../../interfaces/folders";
 
 const Folders: FC = () => {
 	const [folders, setFolders] = useState<IFolder[]>([]);
-	const [parentFodersIds, setParentFoldersIds] = useState<number[]>([]);
+	const [parentFolders, setParentFolders] = useState<IFolder[]>([]);
 	const [modal, setModal] = useState<EModal | null>(null);
 
 	const parentId = useMemo(() => {
-		if (parentFodersIds.length > 0) {
-			return parentFodersIds[parentFodersIds.length - 1];
+		if (parentFolders.length > 0) {
+			return parentFolders[parentFolders.length - 1].id;
 		}
 
 		return 0;
-	}, [parentFodersIds]);
+	}, [parentFolders]);
 
-	const { data: foldersByParent, isFetching: isFetchingFoldersByParent } = useFoldersByParent(parentId);
+	const { data: foldersByParent, isFetching } = useFoldersByParent(parentId);
 	const { mutate: createNewFolder, data: newFolder, isPending: isPendingNewFolder } = useNewFolder();
 
 	useEffect(() => {
@@ -41,33 +41,67 @@ const Folders: FC = () => {
 		onModalClose();
 	}, [newFolder]);
 
-	const onModalNew = () => setModal(EModal.New);
+	const onOpenModalNew = () => setModal(EModal.New);
 	const onModalClose = () => setModal(null);
 
 	const createFolder = (formValues: IFolderFormValues) => {
 		createNewFolder({ ...formValues, parentId: parentId || undefined });
 	};
 
-	const onFolderClick = (folderId: number) => {
-		setParentFoldersIds((prev) => [...prev, folderId]);
+	const onFolderClick = (folder: IFolder) => {
+		setParentFolders((prev) => [...prev, folder]);
 	};
 
-	const isFetchingFolders = isFetchingFoldersByParent;
-	const hasFolders = folders.length > 0 && !isFetchingFolders;
+	const onCrumbsClick = (folder?: IFolder) => {
+		if (!folder) {
+			return setParentFolders([]);
+		}
+		const folderId = folder.id;
+		setParentFolders((prev) => {
+			const index = prev.findIndex((f) => f.id === folderId);
+			if (index === -1) {
+				return prev;
+			}
+
+			return prev.slice(0, index + 1);
+		});
+	};
+
+	const hasFolders = folders.length > 0 && !isFetching;
+	const hasParentsFolders = parentFolders.length > 0 && !isFetching;
 
 	return (
 		<FoldersStyled>
+			<SubTitle>Navigation:</SubTitle>
+			<NavList>
+				<NavItem>
+					<CrumbBtn type="button" onClick={() => onCrumbsClick()}>
+						Main Folder
+					</CrumbBtn>
+				</NavItem>
+
+				{hasParentsFolders &&
+					parentFolders.map((folder) => (
+						<NavItem key={folder.id}>
+							<SignMore>{">"}</SignMore>
+							<CrumbBtn type="button" onClick={() => onCrumbsClick(folder)}>
+								{folder.name}
+							</CrumbBtn>
+						</NavItem>
+					))}
+			</NavList>
+
 			<button type="button">
 				<Title>Folders</Title>
 			</button>
 
 			<FoldersList>
-				{isFetchingFolders && <Loader />}
+				{isFetching && <Loader />}
 
 				{hasFolders &&
 					folders.map((folder) => (
 						<FoldersItem key={folder.id}>
-							<Button type="button" onClick={() => onFolderClick(folder.id)}>
+							<Button type="button" onClick={() => onFolderClick(folder)}>
 								<Icon width="50" height="50">
 									<use xlinkHref="/icons/sprite.svg#folder" />
 								</Icon>
@@ -76,11 +110,13 @@ const Folders: FC = () => {
 						</FoldersItem>
 					))}
 
-				<Button type="button" onClick={onModalNew}>
-					<Icon width="50" height="50">
-						<use xlinkHref="/icons/sprite.svg#folder-plus" />
-					</Icon>
-				</Button>
+				{!isFetching && (
+					<Button type="button" onClick={onOpenModalNew}>
+						<Icon width="50" height="50">
+							<use xlinkHref="/icons/sprite.svg#folder-plus" />
+						</Icon>
+					</Button>
+				)}
 			</FoldersList>
 
 			{modal === EModal.New && (
@@ -107,7 +143,13 @@ const Title = styled.h2`
 	color: #4c758b;
 `;
 
+const SubTitle = styled.p`
+	font-weight: 700;
+	color: #4c758b;
+`;
+
 const FoldersList = styled.ul`
+	min-height: 74px;
 	display: flex;
 	align-items: flex-start;
 	gap: 10px;
@@ -129,4 +171,27 @@ const Button = styled.button`
 
 const Icon = styled.svg`
 	fill: #d1c847;
+`;
+
+const NavList = styled.ul`
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	flex-wrap: wrap;
+	margin-bottom: 20px;
+`;
+
+const NavItem = styled.li`
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 16px;
+`;
+
+const CrumbBtn = styled.button`
+	font-size: 18px;
+`;
+
+const SignMore = styled.span`
+	margin-right: 5px;
 `;

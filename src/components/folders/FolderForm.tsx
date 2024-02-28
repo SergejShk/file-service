@@ -63,6 +63,7 @@ const FormStyled = styled.form`
 `;
 
 const LabelIsPublick = styled.label`
+	cursor: pointer;
 	display: flex;
 	align-items: center;
 	gap: 8px;

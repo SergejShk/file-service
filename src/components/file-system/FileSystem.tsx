@@ -21,6 +21,7 @@ const FileSystem: FC = () => {
 export default FileSystem;
 
 const FileSystemStyled = styled.div`
+	width: 100%;
 	display: flex;
 	flex-direction: column;
 `;

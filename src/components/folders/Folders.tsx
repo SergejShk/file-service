@@ -2,19 +2,28 @@ import { FC, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import Modal from "../common/Modal";
+import Loader from "../common/Loader";
 
 import FolderForm from "./FolderForm";
 
+import { useFoldersByUser } from "../../hooks/mutations/folders/useFoldersByUserId";
 import { useNewFolder } from "../../hooks/mutations/folders/useNewFolder";
 
 import { EModal } from "../../interfaces/common";
 import { IFolder, IFolderFormValues } from "../../interfaces/folders";
 
 const Folders: FC = () => {
+	const { data: foldersByUser, isFetching: isFetchingFoldersByUser } = useFoldersByUser();
 	const { mutate: createNewFolder, data: newFolder, isPending: isPendingNewFolder } = useNewFolder();
 
 	const [folders, setFolders] = useState<IFolder[]>([]);
 	const [modal, setModal] = useState<EModal | null>(null);
+
+	useEffect(() => {
+		if (!foldersByUser?.data) return;
+
+		setFolders(foldersByUser.data);
+	}, [foldersByUser]);
 
 	useEffect(() => {
 		if (!newFolder?.data) return;
@@ -31,10 +40,14 @@ const Folders: FC = () => {
 		createNewFolder({ ...formValues });
 	};
 
+	const hasFolders = folders.length > 0 && !isFetchingFoldersByUser;
+
 	return (
-		<div>
+		<FoldersStyled>
 			<FoldersList>
-				{folders.length > 0 &&
+				{isFetchingFoldersByUser && <Loader />}
+
+				{hasFolders &&
 					folders.map((folder) => (
 						<FoldersItem key={folder.id}>
 							<Button type="button" onClick={onModalNew}>
@@ -62,11 +75,15 @@ const Folders: FC = () => {
 					/>
 				</Modal>
 			)}
-		</div>
+		</FoldersStyled>
 	);
 };
 
 export default Folders;
+
+const FoldersStyled = styled.div`
+	width: 100%;
+`;
 
 const FoldersList = styled.ul`
 	display: flex;

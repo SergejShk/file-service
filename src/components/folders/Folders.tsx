@@ -9,6 +9,7 @@ import FolderForm from "./FolderForm";
 
 import { useFoldersByParent } from "../../hooks/mutations/folders/useGetFoldersByParent";
 import { useNewFolder } from "../../hooks/mutations/folders/useNewFolder";
+import { useUpdateFolder } from "../../hooks/mutations/folders/useUpdateFolder";
 
 import { EModal } from "../../interfaces/common";
 import { IFolder, IFolderFormValues } from "../../interfaces/folders";
@@ -17,6 +18,7 @@ const Folders: FC = () => {
 	const [folders, setFolders] = useState<IFolder[]>([]);
 	const [parentFolders, setParentFolders] = useState<IFolder[]>([]);
 	const [modal, setModal] = useState<EModal | null>(null);
+	const [selectedFolder, setSelectedFolder] = useState<IFolder | undefined>(undefined);
 
 	const parentId = useMemo(() => {
 		if (parentFolders.length > 0) {
@@ -28,6 +30,7 @@ const Folders: FC = () => {
 
 	const { data: foldersByParent, isFetching } = useFoldersByParent(parentId);
 	const { mutate: createNewFolder, data: newFolder, isPending: isPendingNewFolder } = useNewFolder();
+	const { mutate: updateFolder, data: updatedFolder, isPending: isPendingUpdateFolder } = useUpdateFolder();
 
 	useEffect(() => {
 		if (!foldersByParent?.data) return;
@@ -42,11 +45,51 @@ const Folders: FC = () => {
 		onModalClose();
 	}, [newFolder]);
 
-	const onOpenModalNew = () => setModal(EModal.New);
+	useEffect(() => {
+		if (!updatedFolder?.data) return;
+
+		setFolders((prev) =>
+			prev.map((folder) => {
+				if (folder.id === updatedFolder.data.id) {
+					return updatedFolder.data;
+				}
+
+				return folder;
+			})
+		);
+		onModalClose();
+	}, [updatedFolder]);
+
 	const onModalClose = () => setModal(null);
 
-	const createFolder = (formValues: IFolderFormValues) => {
-		createNewFolder({ ...formValues, parentId: parentId || undefined });
+	const onActionBtnClick = (action: EModal, folder?: IFolder) => {
+		switch (action) {
+			case EModal.New:
+				return setModal(EModal.New);
+
+			case EModal.Edit:
+				setModal(EModal.Edit);
+				setSelectedFolder(folder);
+				return;
+
+			case EModal.Permission:
+				setModal(EModal.Permission);
+				setSelectedFolder(folder);
+				break;
+		}
+	};
+
+	const handleSaveForm = (formValues: IFolderFormValues) => {
+		switch (modal) {
+			case EModal.New:
+				return createNewFolder({ ...formValues, parentId: parentId || undefined });
+			case EModal.Edit:
+				if (!selectedFolder?.id) return;
+				return updateFolder({ ...formValues, id: selectedFolder.id });
+
+			default:
+				return;
+		}
 	};
 
 	const onFolderClick = (folder: IFolder) => {
@@ -89,6 +132,19 @@ const Folders: FC = () => {
 				{hasFolders &&
 					folders.map((folder) => (
 						<FoldersItem key={folder.id}>
+							<SettingsBtnWrapper>
+								<button type="button" onClick={() => onActionBtnClick(EModal.Permission, folder)}>
+									<svg width="15" height="15">
+										<use xlinkHref="/icons/sprite.svg#key" />
+									</svg>
+								</button>
+								<button type="button" onClick={() => onActionBtnClick(EModal.Edit, folder)}>
+									<svg width="20" height="20">
+										<use xlinkHref="/icons/sprite.svg#pencil" />
+									</svg>
+								</button>
+							</SettingsBtnWrapper>
+
 							<Button type="button" onClick={() => onFolderClick(folder)}>
 								<Icon width="50" height="50">
 									<use xlinkHref="/icons/sprite.svg#folder" />
@@ -99,11 +155,14 @@ const Folders: FC = () => {
 					))}
 
 				{!isFetching && (
-					<Button type="button" onClick={onOpenModalNew}>
-						<Icon width="50" height="50">
-							<use xlinkHref="/icons/sprite.svg#folder-plus" />
-						</Icon>
-					</Button>
+					<FoldersItem>
+						<SettingsBtnWrapper />
+						<Button type="button" onClick={() => onActionBtnClick(EModal.New)}>
+							<Icon width="50" height="50">
+								<use xlinkHref="/icons/sprite.svg#folder-plus" />
+							</Icon>
+						</Button>
+					</FoldersItem>
 				)}
 			</FoldersList>
 
@@ -111,7 +170,18 @@ const Folders: FC = () => {
 				<Modal onModalClose={onModalClose}>
 					<FolderForm
 						isLoading={isPendingNewFolder}
-						onSaveClick={createFolder}
+						onSaveClick={handleSaveForm}
+						onCancelClick={onModalClose}
+					/>
+				</Modal>
+			)}
+
+			{modal === EModal.Edit && (
+				<Modal onModalClose={onModalClose}>
+					<FolderForm
+						initialFolder={selectedFolder}
+						isLoading={isPendingUpdateFolder}
+						onSaveClick={handleSaveForm}
 						onCancelClick={onModalClose}
 					/>
 				</Modal>
@@ -145,6 +215,15 @@ const FoldersItem = styled.li`
 	align-items: center;
 	justify-content: center;
 	font-size: 16px;
+`;
+
+const SettingsBtnWrapper = styled.div`
+	min-height: 25px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+	margin-bottom: -5px;
 `;
 
 const Button = styled.button`

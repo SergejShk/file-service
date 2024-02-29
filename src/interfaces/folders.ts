@@ -18,3 +18,9 @@ export interface IFolderFormValues {
 	name: string;
 	isPublick: boolean;
 }
+
+export interface IUpdateFolderBody {
+	id: number;
+	name: string;
+	isPublick: boolean;
+}

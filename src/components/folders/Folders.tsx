@@ -4,6 +4,7 @@ import styled from "styled-components";
 import Modal from "../common/Modal";
 import Loader from "../common/Loader";
 
+import Navigation from "./Navigation";
 import FolderForm from "./FolderForm";
 
 import { useFoldersByParent } from "../../hooks/mutations/folders/useGetFoldersByParent";
@@ -72,24 +73,11 @@ const Folders: FC = () => {
 
 	return (
 		<FoldersStyled>
-			<SubTitle>Navigation:</SubTitle>
-			<NavList>
-				<NavItem>
-					<CrumbBtn type="button" onClick={() => onCrumbsClick()}>
-						Main Folder
-					</CrumbBtn>
-				</NavItem>
-
-				{hasParentsFolders &&
-					parentFolders.map((folder) => (
-						<NavItem key={folder.id}>
-							<SignMore>{">"}</SignMore>
-							<CrumbBtn type="button" onClick={() => onCrumbsClick(folder)}>
-								{folder.name}
-							</CrumbBtn>
-						</NavItem>
-					))}
-			</NavList>
+			<Navigation
+				hasParentsFolders={hasParentsFolders}
+				parentFolders={parentFolders}
+				onCrumbsClick={onCrumbsClick}
+			/>
 
 			<button type="button">
 				<Title>Folders</Title>
@@ -143,11 +131,6 @@ const Title = styled.h2`
 	color: #4c758b;
 `;
 
-const SubTitle = styled.p`
-	font-weight: 700;
-	color: #4c758b;
-`;
-
 const FoldersList = styled.ul`
 	min-height: 74px;
 	display: flex;
@@ -171,27 +154,4 @@ const Button = styled.button`
 
 const Icon = styled.svg`
 	fill: #d1c847;
-`;
-
-const NavList = styled.ul`
-	display: flex;
-	align-items: center;
-	gap: 5px;
-	flex-wrap: wrap;
-	margin-bottom: 20px;
-`;
-
-const NavItem = styled.li`
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 16px;
-`;
-
-const CrumbBtn = styled.button`
-	font-size: 18px;
-`;
-
-const SignMore = styled.span`
-	margin-right: 5px;
 `;

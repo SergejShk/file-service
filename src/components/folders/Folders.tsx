@@ -1,4 +1,5 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, FC, useEffect, useMemo, useState } from "react";
+import debounce from "lodash.debounce";
 import styled from "styled-components";
 
 import Modal from "../common/Modal";
@@ -21,6 +22,7 @@ import { IFolder, IFolderFormValues } from "../../interfaces/folders";
 const Folders: FC = () => {
 	const { auth } = useAuthContext();
 
+	const [serchName, setSearchName] = useState("");
 	const [folders, setFolders] = useState<IFolder[]>([]);
 	const [parentFolders, setParentFolders] = useState<IFolder[]>([]);
 	const [modal, setModal] = useState<EModal | null>(null);
@@ -34,7 +36,7 @@ const Folders: FC = () => {
 		return 0;
 	}, [parentFolders]);
 
-	const { data: foldersByParent, isFetching } = useFoldersByParent(parentId);
+	const { data: foldersByParent, isFetching } = useFoldersByParent(parentId, serchName);
 	const { mutate: createNewFolder, data: newFolder, isPending: isPendingNewFolder } = useNewFolder();
 	const { mutate: updateFolder, data: updatedFolder, isPending: isPendingUpdateFolder } = useUpdateFolder();
 	const {
@@ -139,6 +141,14 @@ const Folders: FC = () => {
 		});
 	};
 
+	const updateSearchValue = debounce((value: string) => {
+		setSearchName(value);
+	}, 500);
+
+	const handleSearchInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+		updateSearchValue(e.target.value);
+	};
+
 	const hasFolders = folders.length > 0 && !isFetching;
 	const hasParentsFolders = parentFolders.length > 0 && !isFetching;
 
@@ -148,6 +158,14 @@ const Folders: FC = () => {
 				hasParentsFolders={hasParentsFolders}
 				parentFolders={parentFolders}
 				onCrumbsClick={onCrumbsClick}
+			/>
+
+			<InputSearch
+				name="name"
+				type="text"
+				placeholder="Type..."
+				onChange={handleSearchInputChange}
+				autoComplete="off"
 			/>
 
 			<button type="button">
@@ -278,4 +296,24 @@ const Button = styled.button`
 
 const Icon = styled.svg`
 	fill: #d1c847;
+`;
+
+const InputSearch = styled.input`
+	display: block;
+	margin: 0 auto 15px;
+	width: 30%;
+	border-radius: 4px;
+	border: 1px solid #b6d9ee;
+	background-color: #fff;
+	font-size: 18px;
+	line-height: normal;
+	letter-spacing: 0.72px;
+	color: #484848;
+	outline: none;
+	padding: 10px;
+
+	&:hover,
+	&:focus {
+		border-color: #4c758b;
+	}
 `;

@@ -3,9 +3,12 @@ import styled from "styled-components";
 
 import Modal from "../common/Modal";
 import Loader from "../common/Loader";
+import FolderForm from "../common/forms/FolderForm";
+import PermissionForm from "../common/forms/PermissionForm";
 
 import Navigation from "./Navigation";
-import FolderForm from "./FolderForm";
+
+import { useAuthContext } from "../../context/AuthContext";
 
 import { useFoldersByParent } from "../../hooks/mutations/folders/useGetFoldersByParent";
 import { useNewFolder } from "../../hooks/mutations/folders/useNewFolder";
@@ -15,6 +18,8 @@ import { EModal } from "../../interfaces/common";
 import { IFolder, IFolderFormValues } from "../../interfaces/folders";
 
 const Folders: FC = () => {
+	const { auth } = useAuthContext();
+
 	const [folders, setFolders] = useState<IFolder[]>([]);
 	const [parentFolders, setParentFolders] = useState<IFolder[]>([]);
 	const [modal, setModal] = useState<EModal | null>(null);
@@ -79,7 +84,7 @@ const Folders: FC = () => {
 		}
 	};
 
-	const handleSaveForm = (formValues: IFolderFormValues) => {
+	const handleSaveFolderForm = (formValues: IFolderFormValues) => {
 		switch (modal) {
 			case EModal.New:
 				return createNewFolder({ ...formValues, parentId: parentId || undefined });
@@ -90,6 +95,10 @@ const Folders: FC = () => {
 			default:
 				return;
 		}
+	};
+
+	const handleSavePermissionsForm = (editors: number[]) => {
+		console.log(editors);
 	};
 
 	const onFolderClick = (folder: IFolder) => {
@@ -133,11 +142,13 @@ const Folders: FC = () => {
 					folders.map((folder) => (
 						<FoldersItem key={folder.id}>
 							<SettingsBtnWrapper>
-								<button type="button" onClick={() => onActionBtnClick(EModal.Permission, folder)}>
-									<svg width="15" height="15">
-										<use xlinkHref="/icons/sprite.svg#key" />
-									</svg>
-								</button>
+								{auth.id === folder.userId && folder.isPublick && (
+									<button type="button" onClick={() => onActionBtnClick(EModal.Permission, folder)}>
+										<svg width="15" height="15">
+											<use xlinkHref="/icons/sprite.svg#key" />
+										</svg>
+									</button>
+								)}
 								<button type="button" onClick={() => onActionBtnClick(EModal.Edit, folder)}>
 									<svg width="20" height="20">
 										<use xlinkHref="/icons/sprite.svg#pencil" />
@@ -169,19 +180,33 @@ const Folders: FC = () => {
 			{modal === EModal.New && (
 				<Modal onModalClose={onModalClose}>
 					<FolderForm
+						isOwner={true}
 						isLoading={isPendingNewFolder}
-						onSaveClick={handleSaveForm}
+						onSaveClick={handleSaveFolderForm}
 						onCancelClick={onModalClose}
 					/>
 				</Modal>
 			)}
 
-			{modal === EModal.Edit && (
+			{modal === EModal.Edit && !!selectedFolder && (
 				<Modal onModalClose={onModalClose}>
 					<FolderForm
 						initialFolder={selectedFolder}
+						isOwner={auth.id === selectedFolder.userId}
 						isLoading={isPendingUpdateFolder}
-						onSaveClick={handleSaveForm}
+						onSaveClick={handleSaveFolderForm}
+						onCancelClick={onModalClose}
+					/>
+				</Modal>
+			)}
+
+			{modal === EModal.Permission && !!selectedFolder && (
+				<Modal onModalClose={onModalClose}>
+					<PermissionForm
+						ownerId={auth.id}
+						entityName={selectedFolder.name}
+						isLoading={false}
+						onSaveClick={handleSavePermissionsForm}
 						onCancelClick={onModalClose}
 					/>
 				</Modal>

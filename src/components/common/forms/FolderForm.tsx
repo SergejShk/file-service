@@ -2,20 +2,21 @@ import { FC } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 
-import Checkbox from "../common/Checkbox";
-import Input from "../common/Input";
-import { Button } from "../common/Button";
+import Checkbox from "../Checkbox";
+import Input from "../Input";
+import { Button } from "../Button";
 
-import { IFolderFormValues } from "../../interfaces/folders";
+import { IFolderFormValues } from "../../../interfaces/folders";
 
 interface IProps {
 	initialFolder?: IFolderFormValues;
+	isOwner: boolean;
 	isLoading: boolean;
 	onSaveClick: (values: IFolderFormValues) => void;
 	onCancelClick: () => void;
 }
 
-const FolderForm: FC<IProps> = ({ initialFolder, isLoading, onSaveClick, onCancelClick }) => {
+const FolderForm: FC<IProps> = ({ initialFolder, isOwner, isLoading, onSaveClick, onCancelClick }) => {
 	const {
 		register,
 		handleSubmit,
@@ -29,10 +30,12 @@ const FolderForm: FC<IProps> = ({ initialFolder, isLoading, onSaveClick, onCance
 
 	return (
 		<FormStyled onSubmit={handleSubmit(onSaveClick)}>
-			<LabelIsPublick>
-				<Checkbox name="isPublick" register={register} />
-				<span>Is Publick</span>
-			</LabelIsPublick>
+			{!!initialFolder && isOwner && (
+				<LabelIsPublick>
+					<Checkbox name="isPublick" register={register} />
+					<span>Is Publick</span>
+				</LabelIsPublick>
+			)}
 
 			<Input
 				type="text"

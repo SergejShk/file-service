@@ -7,7 +7,6 @@ export const getFilesByFolderIdApi = async (
 	folderId: number,
 	name: string
 ): Promise<ApiResult<IFileApi[]>> => {
-	console.log("hello service");
 	const { data } = await apiInstance.post<Promise<ApiResult<IFileApi[]>>>(
 		`files/list-by-folder/${folderId}`,
 		{ name }

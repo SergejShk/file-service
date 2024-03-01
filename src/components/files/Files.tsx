@@ -3,6 +3,11 @@ import styled from "styled-components";
 
 import Modal from "../common/Modal";
 import FilesForm from "../common/forms/FilesForm";
+import Loader from "../common/Loader";
+
+import { getFileApi } from "../../services/files/getFile";
+
+import { useAuthContext } from "../../context/AuthContext";
 
 import { useNewFile } from "../../hooks/mutations/files/useNewFile";
 import { useFilesByFolder } from "../../hooks/mutations/files/useGetFilesByFolder";
@@ -15,14 +20,20 @@ interface IProps {
 }
 
 const Files: FC<IProps> = ({ folderId }) => {
+	const { auth } = useAuthContext();
+
 	const [files, setFiles] = useState<IFileApi[]>([]);
+	const [selectedFile, setSelectedFile] = useState<IFileApi | undefined>(undefined);
 	const [modal, setModal] = useState<EModal | null>(null);
 
 	const { data: filesByFolders, isFetching } = useFilesByFolder(folderId, "");
 	const { mutate: createNewFile, data: newFile, isPending: isPendingNewFile } = useNewFile();
 
-	console.log("files", files);
-	console.log("filesByFolders", filesByFolders);
+	useEffect(() => {
+		if (!filesByFolders?.data) return;
+
+		setFiles(filesByFolders.data);
+	}, [filesByFolders]);
 
 	useEffect(() => {
 		if (!newFile?.data) return;
@@ -30,13 +41,6 @@ const Files: FC<IProps> = ({ folderId }) => {
 		setFiles((prev) => [...prev, newFile.data]);
 		onModalClose();
 	}, [newFile]);
-
-	const onActionBtnClick = (action: EModal) => {
-		switch (action) {
-			case EModal.New:
-				return setModal(EModal.New);
-		}
-	};
 
 	const onModalClose = () => setModal(null);
 
@@ -50,11 +54,70 @@ const Files: FC<IProps> = ({ folderId }) => {
 		}
 	};
 
+	const onActionBtnClick = (action: EModal, file?: IFileApi) => {
+		switch (action) {
+			case EModal.New:
+				return setModal(EModal.New);
+
+			case EModal.Edit:
+				setModal(EModal.Edit);
+				setSelectedFile(file);
+				return;
+
+			case EModal.Permission:
+				setModal(EModal.Permission);
+				setSelectedFile(file);
+				break;
+		}
+	};
+
+	const onFileClick = async (file: IFileApi) => {
+		const response = await getFileApi(file.key);
+
+		if (!response.data) return;
+
+		window.open(response.data, "_blank");
+	};
+
+	const hasFiles = files.length > 0 && !isFetching;
+
 	return (
 		<FilesStyled>
 			<Title>Files</Title>
 
 			<FilesList>
+				{isFetching && <Loader />}
+
+				{hasFiles &&
+					files.map((file) => (
+						<FilesItem key={file.id}>
+							<SettingsBtnWrapper>
+								{auth.id === file.userId && file.isPublick && (
+									<button type="button" onClick={() => onActionBtnClick(EModal.Permission, file)}>
+										<svg width="15" height="15">
+											<use xlinkHref="/icons/sprite.svg#key" />
+										</svg>
+									</button>
+								)}
+
+								{(auth.id === file.userId || file.editorsIds?.includes(auth.id)) && (
+									<button type="button" onClick={() => onActionBtnClick(EModal.Edit, file)}>
+										<svg width="20" height="20">
+											<use xlinkHref="/icons/sprite.svg#pencil" />
+										</svg>
+									</button>
+								)}
+							</SettingsBtnWrapper>
+
+							<Button type="button" onClick={() => onFileClick(file)}>
+								<Icon width="60" height="60">
+									<use xlinkHref="/icons/sprite.svg#file" />
+								</Icon>
+							</Button>
+							<FileTitle>{file.name}</FileTitle>
+						</FilesItem>
+					))}
+
 				<FilesItem>
 					<SettingsBtnWrapper />
 					<Button type="button" onClick={() => onActionBtnClick(EModal.New)}>
@@ -123,4 +186,11 @@ const Button = styled.button`
 
 const Icon = styled.svg`
 	fill: #ccc;
+`;
+
+const FileTitle = styled.div`
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: pre-line;
+	word-break: break-word;
 `;

@@ -5,6 +5,7 @@ import Modal from "../common/Modal";
 import FilesForm from "../common/forms/FilesForm";
 
 import { useNewFile } from "../../hooks/mutations/files/useNewFile";
+import { useFilesByFolder } from "../../hooks/mutations/files/useGetFilesByFolder";
 
 import { EModal } from "../../interfaces/common";
 import { IFileApi, IFilesFormValues } from "../../interfaces/files";
@@ -16,8 +17,13 @@ interface IProps {
 const Files: FC<IProps> = ({ folderId }) => {
 	const [files, setFiles] = useState<IFileApi[]>([]);
 	const [modal, setModal] = useState<EModal | null>(null);
+
+	const { data: filesByFolders, isFetching } = useFilesByFolder(folderId, "");
 	const { mutate: createNewFile, data: newFile, isPending: isPendingNewFile } = useNewFile();
+
 	console.log("files", files);
+	console.log("filesByFolders", filesByFolders);
+
 	useEffect(() => {
 		if (!newFile?.data) return;
 
@@ -37,7 +43,7 @@ const Files: FC<IProps> = ({ folderId }) => {
 	const handleSaveFilesForm = (formValues: IFilesFormValues) => {
 		switch (modal) {
 			case EModal.New:
-				return createNewFile({ ...formValues, folderId });
+				return createNewFile({ ...formValues, folderId: folderId || undefined });
 
 			default:
 				return;

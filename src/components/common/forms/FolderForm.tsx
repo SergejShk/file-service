@@ -30,7 +30,7 @@ const FolderForm: FC<IProps> = ({ initialFolder, isOwner, isLoading, onSaveClick
 
 	return (
 		<FormStyled onSubmit={handleSubmit(onSaveClick)}>
-			{!!initialFolder && isOwner && (
+			{isOwner && (
 				<LabelIsPublick>
 					<Checkbox name="isPublick" register={register} />
 					<span>Is Publick</span>

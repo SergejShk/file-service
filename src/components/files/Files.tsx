@@ -11,6 +11,7 @@ import { useAuthContext } from "../../context/AuthContext";
 
 import { useNewFile } from "../../hooks/mutations/files/useNewFile";
 import { useFilesByFolder } from "../../hooks/mutations/files/useGetFilesByFolder";
+import { useUpdateFile } from "../../hooks/mutations/files/useUpdateFile";
 
 import { EModal } from "../../interfaces/common";
 import { IFileApi, IFilesFormValues } from "../../interfaces/files";
@@ -28,6 +29,18 @@ const Files: FC<IProps> = ({ folderId }) => {
 
 	const { data: filesByFolders, isFetching } = useFilesByFolder(folderId, "");
 	const { mutate: createNewFile, data: newFile, isPending: isPendingNewFile } = useNewFile();
+	const { mutate: updateFile, data: updatedFile, isPending: isPendingUpdateFile } = useUpdateFile();
+
+	const updateFiles = (newFile: IFileApi) =>
+		setFiles((prev) =>
+			prev.map((file) => {
+				if (file.id === newFile.id) {
+					return newFile;
+				}
+
+				return file;
+			})
+		);
 
 	useEffect(() => {
 		if (!filesByFolders?.data) return;
@@ -42,12 +55,23 @@ const Files: FC<IProps> = ({ folderId }) => {
 		onModalClose();
 	}, [newFile]);
 
+	useEffect(() => {
+		if (!updatedFile?.data) return;
+
+		updateFiles(updatedFile.data);
+		onModalClose();
+	}, [updatedFile]);
+
 	const onModalClose = () => setModal(null);
 
 	const handleSaveFilesForm = (formValues: IFilesFormValues) => {
 		switch (modal) {
 			case EModal.New:
 				return createNewFile({ ...formValues, folderId: folderId || undefined });
+
+			case EModal.Edit:
+				if (!selectedFile?.id) return;
+				return updateFile({ name: formValues.name, isPublick: formValues.isPublick, id: selectedFile.id });
 
 			default:
 				return;
@@ -118,14 +142,16 @@ const Files: FC<IProps> = ({ folderId }) => {
 						</FilesItem>
 					))}
 
-				<FilesItem>
-					<SettingsBtnWrapper />
-					<Button type="button" onClick={() => onActionBtnClick(EModal.New)}>
-						<Icon width="60" height="60">
-							<use xlinkHref="/icons/sprite.svg#file-plus" />
-						</Icon>
-					</Button>
-				</FilesItem>
+				{!isFetching && (
+					<FilesItem>
+						<SettingsBtnWrapper />
+						<Button type="button" onClick={() => onActionBtnClick(EModal.New)}>
+							<Icon width="60" height="60">
+								<use xlinkHref="/icons/sprite.svg#file-plus" />
+							</Icon>
+						</Button>
+					</FilesItem>
+				)}
 			</FilesList>
 
 			{modal === EModal.New && (
@@ -133,6 +159,18 @@ const Files: FC<IProps> = ({ folderId }) => {
 					<FilesForm
 						isOwner={true}
 						isLoading={isPendingNewFile}
+						onSaveClick={handleSaveFilesForm}
+						onCancelClick={onModalClose}
+					/>
+				</Modal>
+			)}
+
+			{modal === EModal.Edit && selectedFile && (
+				<Modal onModalClose={onModalClose}>
+					<FilesForm
+						initialFile={selectedFile}
+						isOwner={auth.id === selectedFile.userId}
+						isLoading={isPendingUpdateFile}
 						onSaveClick={handleSaveFilesForm}
 						onCancelClick={onModalClose}
 					/>

@@ -40,6 +40,7 @@ export const useFiles = () => {
 	};
 
 	const handleOnDrop = useCallback(async (files: File[]) => {
+		console.log("drop", files);
 		if (files.length > 1) {
 			setUploadErrors("Max files length is 1");
 			return;

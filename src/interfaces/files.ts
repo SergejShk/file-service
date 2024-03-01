@@ -40,3 +40,9 @@ export interface IFileApi extends INewFileBody {
 	id: number;
 	userId: number;
 }
+
+export interface IFileUpdateBody {
+	id: number;
+	name: string;
+	isPublick: boolean;
+}

@@ -19,7 +19,7 @@ interface IProps {
 	onCancelClick: () => void;
 }
 
-const FilesForm: FC<IProps> = ({ initialFile, isLoading, onSaveClick, onCancelClick }) => {
+const FilesForm: FC<IProps> = ({ initialFile, isOwner, isLoading, onSaveClick, onCancelClick }) => {
 	const { uploadedFile, uploadErrors, isUploadLoading, handleFileUpload, setUploadErrors, handleOnDrop } =
 		useFiles();
 	const { getRootProps, getInputProps } = useDropzone({ onDrop: handleOnDrop, noClick: true });
@@ -36,7 +36,7 @@ const FilesForm: FC<IProps> = ({ initialFile, isLoading, onSaveClick, onCancelCl
 	} = useForm<IFilesFormValues>({
 		defaultValues: {
 			name: initialFile?.name || "",
-			key: initialFile?.name || "",
+			key: initialFile?.key || "",
 			isPublick: initialFile?.isPublick || false,
 		},
 	});
@@ -81,12 +81,14 @@ const FilesForm: FC<IProps> = ({ initialFile, isLoading, onSaveClick, onCancelCl
 
 	return (
 		<>
-			<DropzoneUploaderStyled {...(!isLoad ? getRootProps() : {})}>
+			<DropzoneUploaderStyled {...(!isLoad && !initialFile ? getRootProps() : {})}>
 				<FilesFormStyled onSubmit={handleSubmit(onSaveClick)}>
-					<LabelIsPublick>
-						<Checkbox name="isPublick" register={register} />
-						<span>Is Publick</span>
-					</LabelIsPublick>
+					{isOwner && (
+						<LabelIsPublick>
+							<Checkbox name="isPublick" register={register} />
+							<span>Is Publick</span>
+						</LabelIsPublick>
+					)}
 
 					<FileInputWrapper>
 						<Input
@@ -95,17 +97,20 @@ const FilesForm: FC<IProps> = ({ initialFile, isLoading, onSaveClick, onCancelCl
 							register={register}
 							rules={{ required: { value: true, message: "Required" } }}
 							error={errors.name}
-							disabled
 						/>
-						<Button type="button" disabled={isLoading} onClick={handleChooseBtnClick} $minHeight="43px">
-							Choose
-						</Button>
+						{!initialFile && (
+							<Button type="button" disabled={isLoading} onClick={handleChooseBtnClick} $minHeight="43px">
+								Choose
+							</Button>
+						)}
 					</FileInputWrapper>
 
 					<DropzonePlaceholder>Drop files to upload</DropzonePlaceholder>
 
-					{!isLoading && <input {...getInputProps()} />}
-					{!isLoading && <input className="hidden" ref={inputRef} type="file" onChange={handleFileChange} />}
+					{!isLoading && !initialFile && <input {...getInputProps()} />}
+					{!isLoading && !initialFile && (
+						<input className="hidden" ref={inputRef} type="file" onChange={handleFileChange} />
+					)}
 
 					<ButtonWrapper>
 						<Button disabled={isLoading}>Save</Button>

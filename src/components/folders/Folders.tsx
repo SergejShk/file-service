@@ -186,19 +186,22 @@ const Folders: FC = () => {
 										</svg>
 									</button>
 								)}
-								<button type="button" onClick={() => onActionBtnClick(EModal.Edit, folder)}>
-									<svg width="20" height="20">
-										<use xlinkHref="/icons/sprite.svg#pencil" />
-									</svg>
-								</button>
+
+								{(auth.id === folder.userId || folder.editorsIds?.includes(auth.id)) && (
+									<button type="button" onClick={() => onActionBtnClick(EModal.Edit, folder)}>
+										<svg width="20" height="20">
+											<use xlinkHref="/icons/sprite.svg#pencil" />
+										</svg>
+									</button>
+								)}
 							</SettingsBtnWrapper>
 
 							<Button type="button" onClick={() => onFolderClick(folder)}>
-								<Icon width="50" height="50">
+								<Icon width="60" height="60">
 									<use xlinkHref="/icons/sprite.svg#folder" />
 								</Icon>
 							</Button>
-							<p>{folder.name}</p>
+							<FolderTitle>{folder.name}</FolderTitle>
 						</FoldersItem>
 					))}
 
@@ -206,7 +209,7 @@ const Folders: FC = () => {
 					<FoldersItem>
 						<SettingsBtnWrapper />
 						<Button type="button" onClick={() => onActionBtnClick(EModal.New)}>
-							<Icon width="50" height="50">
+							<Icon width="60" height="60">
 								<use xlinkHref="/icons/sprite.svg#folder-plus" />
 							</Icon>
 						</Button>
@@ -273,6 +276,7 @@ const FoldersList = styled.ul`
 `;
 
 const FoldersItem = styled.li`
+	width: 60px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -290,8 +294,8 @@ const SettingsBtnWrapper = styled.div`
 `;
 
 const Button = styled.button`
-	width: 50px;
-	height: 50px;
+	width: 100%;
+	height: 100%;
 `;
 
 const Icon = styled.svg`
@@ -316,4 +320,11 @@ const InputSearch = styled.input`
 	&:focus {
 		border-color: #4c758b;
 	}
+`;
+
+const FolderTitle = styled.div`
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: pre-line;
+	word-break: break-word;
 `;

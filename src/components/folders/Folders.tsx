@@ -13,6 +13,7 @@ import { useAuthContext } from "../../context/AuthContext";
 import { useFoldersByParent } from "../../hooks/mutations/folders/useGetFoldersByParent";
 import { useNewFolder } from "../../hooks/mutations/folders/useNewFolder";
 import { useUpdateFolder } from "../../hooks/mutations/folders/useUpdateFolder";
+import { useUpdateFolderEditors } from "../../hooks/mutations/folders/useUpdateFolderEditors";
 
 import { EModal } from "../../interfaces/common";
 import { IFolder, IFolderFormValues } from "../../interfaces/folders";
@@ -36,6 +37,22 @@ const Folders: FC = () => {
 	const { data: foldersByParent, isFetching } = useFoldersByParent(parentId);
 	const { mutate: createNewFolder, data: newFolder, isPending: isPendingNewFolder } = useNewFolder();
 	const { mutate: updateFolder, data: updatedFolder, isPending: isPendingUpdateFolder } = useUpdateFolder();
+	const {
+		mutate: updateEditors,
+		data: updatedFolderEditors,
+		isPending: isPendingUpdateEditors,
+	} = useUpdateFolderEditors();
+
+	const updateFolders = (newFolder: IFolder) =>
+		setFolders((prev) =>
+			prev.map((folder) => {
+				if (folder.id === newFolder.id) {
+					return newFolder;
+				}
+
+				return folder;
+			})
+		);
 
 	useEffect(() => {
 		if (!foldersByParent?.data) return;
@@ -53,17 +70,16 @@ const Folders: FC = () => {
 	useEffect(() => {
 		if (!updatedFolder?.data) return;
 
-		setFolders((prev) =>
-			prev.map((folder) => {
-				if (folder.id === updatedFolder.data.id) {
-					return updatedFolder.data;
-				}
-
-				return folder;
-			})
-		);
+		updateFolders(updatedFolder.data);
 		onModalClose();
 	}, [updatedFolder]);
+
+	useEffect(() => {
+		if (!updatedFolderEditors?.data) return;
+
+		updateFolders(updatedFolderEditors.data);
+		onModalClose();
+	}, [updatedFolderEditors]);
 
 	const onModalClose = () => setModal(null);
 
@@ -98,7 +114,10 @@ const Folders: FC = () => {
 	};
 
 	const handleSavePermissionsForm = (editors: number[]) => {
-		console.log(editors);
+		if (!selectedFolder?.id) return;
+
+		const id = selectedFolder.id;
+		updateEditors({ id, editorsIds: editors });
 	};
 
 	const onFolderClick = (folder: IFolder) => {
@@ -203,9 +222,10 @@ const Folders: FC = () => {
 			{modal === EModal.Permission && !!selectedFolder && (
 				<Modal onModalClose={onModalClose}>
 					<PermissionForm
+						initialEditors={selectedFolder.editorsIds}
 						ownerId={auth.id}
 						entityName={selectedFolder.name}
-						isLoading={false}
+						isLoading={isPendingUpdateEditors}
 						onSaveClick={handleSavePermissionsForm}
 						onCancelClick={onModalClose}
 					/>

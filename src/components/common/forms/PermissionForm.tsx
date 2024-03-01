@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
 import { Button } from "../Button";
@@ -12,6 +12,7 @@ import { permissionOptions } from "../../../utils/constants";
 import { EPermission, IDropdownOption } from "../../../interfaces/common";
 
 interface IProps {
+	initialEditors?: number[] | null;
 	ownerId: number;
 	entityName: string;
 	isLoading: boolean;
@@ -19,10 +20,22 @@ interface IProps {
 	onCancelClick: () => void;
 }
 
-const PermissionForm: FC<IProps> = ({ ownerId, entityName, isLoading, onSaveClick, onCancelClick }) => {
+const PermissionForm: FC<IProps> = ({
+	initialEditors,
+	ownerId,
+	entityName,
+	isLoading,
+	onSaveClick,
+	onCancelClick,
+}) => {
 	const [editors, setEditors] = useState<number[]>([]);
 
 	const { data: users, isFetching } = useGetUsers();
+
+	useEffect(() => {
+		if (!initialEditors) return;
+		setEditors(initialEditors);
+	}, [initialEditors]);
 
 	const usersWithoutOwner = useMemo(() => {
 		if (!users?.data) return [];

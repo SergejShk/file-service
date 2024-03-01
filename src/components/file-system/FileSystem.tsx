@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useMemo, useState } from "react";
 import styled from "styled-components";
 
 import { Container } from "../common/Container";
@@ -12,6 +12,14 @@ import { IFolder } from "../../interfaces/folders";
 
 const FileSystem: FC = () => {
 	const [parentFolders, setParentFolders] = useState<IFolder[]>([]);
+
+	const currentFolderId = useMemo(() => {
+		if (parentFolders.length > 0) {
+			return parentFolders[parentFolders.length - 1].id;
+		}
+
+		return 0;
+	}, [parentFolders]);
 
 	const onCrumbsClick = (folder?: IFolder) => {
 		if (!folder) {
@@ -37,7 +45,7 @@ const FileSystem: FC = () => {
 					onCrumbsClick={onCrumbsClick}
 				/>
 
-				<Folders parentFolders={parentFolders} setParentFolders={setParentFolders} />
+				<Folders parentId={currentFolderId} setParentFolders={setParentFolders} />
 
 				<Files />
 			</FileSystemStyled>

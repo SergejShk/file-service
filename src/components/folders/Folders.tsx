@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, FC, useEffect, useState } from "react";
 import debounce from "lodash.debounce";
 import styled from "styled-components";
 
@@ -18,25 +18,17 @@ import { EModal } from "../../interfaces/common";
 import { IFolder, IFolderFormValues } from "../../interfaces/folders";
 
 interface IProps {
-	parentFolders: IFolder[];
+	parentId: number;
 	setParentFolders: React.Dispatch<React.SetStateAction<IFolder[]>>;
 }
 
-const Folders: FC<IProps> = ({ parentFolders, setParentFolders }) => {
+const Folders: FC<IProps> = ({ parentId, setParentFolders }) => {
 	const { auth } = useAuthContext();
 
 	const [serchName, setSearchName] = useState("");
 	const [folders, setFolders] = useState<IFolder[]>([]);
 	const [modal, setModal] = useState<EModal | null>(null);
 	const [selectedFolder, setSelectedFolder] = useState<IFolder | undefined>(undefined);
-
-	const parentId = useMemo(() => {
-		if (parentFolders.length > 0) {
-			return parentFolders[parentFolders.length - 1].id;
-		}
-
-		return 0;
-	}, [parentFolders]);
 
 	const { data: foldersByParent, isFetching } = useFoldersByParent(parentId, serchName);
 	const { mutate: createNewFolder, data: newFolder, isPending: isPendingNewFolder } = useNewFolder();

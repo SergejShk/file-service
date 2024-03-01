@@ -2,11 +2,12 @@ import { FC, ReactNode, useEffect } from "react";
 import styled from "styled-components";
 
 interface IProps {
+	height?: string;
 	children: ReactNode;
 	onModalClose: () => void;
 }
 
-const Modal: FC<IProps> = ({ children, onModalClose }) => {
+const Modal: FC<IProps> = ({ height, children, onModalClose }) => {
 	useEffect(() => {
 		const body = document.querySelector("body");
 		if (!body) return;
@@ -36,7 +37,7 @@ const Modal: FC<IProps> = ({ children, onModalClose }) => {
 	return (
 		<Backdrop onClick={onBackdropClick}>
 			<ModalWrapper onClick={onBackdropClick}>
-				<ModalStyled>{children}</ModalStyled>
+				<ModalStyled $height={height}>{children}</ModalStyled>
 			</ModalWrapper>
 		</Backdrop>
 	);
@@ -68,9 +69,9 @@ const ModalWrapper = styled.div`
 	min-height: 100px;
 `;
 
-const ModalStyled = styled.div`
+const ModalStyled = styled.div<{ $height?: string }>`
 	background-color: #fff;
 	border-radius: 8px;
-	min-height: 100px;
+	min-height: ${({ $height }) => $height || "100px"};
 	padding: 20px;
 `;

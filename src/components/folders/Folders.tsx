@@ -168,9 +168,7 @@ const Folders: FC = () => {
 				autoComplete="off"
 			/>
 
-			<button type="button">
-				<Title>Folders</Title>
-			</button>
+			<Title>Folders</Title>
 
 			<FoldersList>
 				{isFetching && <Loader />}

@@ -6,10 +6,11 @@ type InputProps<TFormValues extends FieldValues> = {
 	name: Path<TFormValues>;
 	type: string;
 	label?: string | ReactNode;
-	placeholder: string;
+	placeholder?: string;
 	register?: UseFormRegister<TFormValues>;
 	rules?: RegisterOptions;
 	error?: FieldError;
+	disabled?: boolean;
 };
 
 const Input = <TFormValues extends FieldValues>({
@@ -20,6 +21,7 @@ const Input = <TFormValues extends FieldValues>({
 	register,
 	rules,
 	error,
+	disabled = false,
 }: InputProps<TFormValues>) => {
 	const hasError = !!(error && error.message);
 
@@ -35,6 +37,7 @@ const Input = <TFormValues extends FieldValues>({
 					{...(register && register(name, rules))}
 					aria-invalid={hasError ? "true" : "false"}
 					autoComplete="off"
+					disabled={disabled}
 				/>
 			</Label>
 			{hasError && <ErrorText role="alert">{error.message}</ErrorText>}
@@ -76,6 +79,11 @@ const InputStyled = styled.input`
 	&:hover,
 	&:focus {
 		border-color: #4c758b;
+	}
+
+	&:disabled:hover,
+	&:disabled:focus {
+		border-color: #b6d9ee;
 	}
 `;
 

@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { Container } from "../common/Container";
 
 import Folders from "../folders/Folders";
-import Files from "./Files";
+import Files from "../files/Files";
 
 const FileSystem: FC = () => {
 	return (

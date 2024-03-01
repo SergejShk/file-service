@@ -35,6 +35,7 @@ const Checkbox = <TFormValues extends FieldValues>({
 export default Checkbox;
 
 const CheckboxStyled = styled.label<{ $width?: string; $height?: string }>`
+	cursor: pointer;
 	display: block;
 	width: ${({ $width }) => $width || "20px"};
 	height: ${({ $height }) => $height || "20px"};

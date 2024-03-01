@@ -27,3 +27,16 @@ export interface ICreatePresignedPostRes {
 	url: string;
 	fields: IPresignedFields;
 }
+
+export interface INewFileBody {
+	name: string;
+	key: string;
+	isPublick: boolean;
+	editorsIds?: number[] | null;
+	folderId?: number | null;
+}
+
+export interface IFileApi extends INewFileBody {
+	id: number;
+	userId: number;
+}

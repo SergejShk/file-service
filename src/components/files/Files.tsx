@@ -1,14 +1,29 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import Modal from "../common/Modal";
 import FilesForm from "../common/forms/FilesForm";
 
-import { EModal } from "../../interfaces/common";
-import { IFilesFormValues } from "../../interfaces/files";
+import { useNewFile } from "../../hooks/mutations/files/useNewFile";
 
-const Files: FC = () => {
+import { EModal } from "../../interfaces/common";
+import { IFileApi, IFilesFormValues } from "../../interfaces/files";
+
+interface IProps {
+	folderId: number;
+}
+
+const Files: FC<IProps> = ({ folderId }) => {
+	const [files, setFiles] = useState<IFileApi[]>([]);
 	const [modal, setModal] = useState<EModal | null>(null);
+	const { mutate: createNewFile, data: newFile, isPending: isPendingNewFile } = useNewFile();
+	console.log("files", files);
+	useEffect(() => {
+		if (!newFile?.data) return;
+
+		setFiles((prev) => [...prev, newFile.data]);
+		onModalClose();
+	}, [newFile]);
 
 	const onActionBtnClick = (action: EModal) => {
 		switch (action) {
@@ -20,7 +35,13 @@ const Files: FC = () => {
 	const onModalClose = () => setModal(null);
 
 	const handleSaveFilesForm = (formValues: IFilesFormValues) => {
-		console.log(formValues);
+		switch (modal) {
+			case EModal.New:
+				return createNewFile({ ...formValues, folderId });
+
+			default:
+				return;
+		}
 	};
 
 	return (
@@ -42,7 +63,7 @@ const Files: FC = () => {
 				<Modal onModalClose={onModalClose}>
 					<FilesForm
 						isOwner={true}
-						isLoading={false}
+						isLoading={isPendingNewFile}
 						onSaveClick={handleSaveFilesForm}
 						onCancelClick={onModalClose}
 					/>

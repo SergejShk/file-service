@@ -47,7 +47,7 @@ const FileSystem: FC = () => {
 
 				<Folders parentId={currentFolderId} setParentFolders={setParentFolders} />
 
-				<Files />
+				<Files folderId={currentFolderId} />
 			</FileSystemStyled>
 		</Container>
 	);

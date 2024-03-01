@@ -56,11 +56,11 @@ export default Files;
 
 const FilesStyled = styled.div`
 	width: 100%;
-	padding: 20px 0;
 `;
 
 const Title = styled.h2`
 	color: #4c758b;
+	margin-top: 10px;
 `;
 
 const FilesList = styled.ul`

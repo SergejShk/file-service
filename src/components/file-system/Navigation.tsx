@@ -39,6 +39,7 @@ export default Navigation;
 const SubTitle = styled.p`
 	font-weight: 700;
 	color: #4c758b;
+	margin-top: 15px;
 `;
 
 const NavList = styled.ul`

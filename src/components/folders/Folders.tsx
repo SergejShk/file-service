@@ -7,8 +7,6 @@ import Loader from "../common/Loader";
 import FolderForm from "../common/forms/FolderForm";
 import PermissionForm from "../common/forms/PermissionForm";
 
-import Navigation from "./Navigation";
-
 import { useAuthContext } from "../../context/AuthContext";
 
 import { useFoldersByParent } from "../../hooks/mutations/folders/useGetFoldersByParent";
@@ -19,12 +17,16 @@ import { useUpdateFolderEditors } from "../../hooks/mutations/folders/useUpdateF
 import { EModal } from "../../interfaces/common";
 import { IFolder, IFolderFormValues } from "../../interfaces/folders";
 
-const Folders: FC = () => {
+interface IProps {
+	parentFolders: IFolder[];
+	setParentFolders: React.Dispatch<React.SetStateAction<IFolder[]>>;
+}
+
+const Folders: FC<IProps> = ({ parentFolders, setParentFolders }) => {
 	const { auth } = useAuthContext();
 
 	const [serchName, setSearchName] = useState("");
 	const [folders, setFolders] = useState<IFolder[]>([]);
-	const [parentFolders, setParentFolders] = useState<IFolder[]>([]);
 	const [modal, setModal] = useState<EModal | null>(null);
 	const [selectedFolder, setSelectedFolder] = useState<IFolder | undefined>(undefined);
 
@@ -126,21 +128,6 @@ const Folders: FC = () => {
 		setParentFolders((prev) => [...prev, folder]);
 	};
 
-	const onCrumbsClick = (folder?: IFolder) => {
-		if (!folder) {
-			return setParentFolders([]);
-		}
-		const folderId = folder.id;
-		setParentFolders((prev) => {
-			const index = prev.findIndex((f) => f.id === folderId);
-			if (index === -1) {
-				return prev;
-			}
-
-			return prev.slice(0, index + 1);
-		});
-	};
-
 	const updateSearchValue = debounce((value: string) => {
 		setSearchName(value);
 	}, 500);
@@ -150,16 +137,9 @@ const Folders: FC = () => {
 	};
 
 	const hasFolders = folders.length > 0 && !isFetching;
-	const hasParentsFolders = parentFolders.length > 0 && !isFetching;
 
 	return (
 		<FoldersStyled>
-			<Navigation
-				hasParentsFolders={hasParentsFolders}
-				parentFolders={parentFolders}
-				onCrumbsClick={onCrumbsClick}
-			/>
-
 			<InputSearch
 				name="name"
 				type="text"
@@ -258,11 +238,11 @@ export default Folders;
 
 const FoldersStyled = styled.div`
 	width: 100%;
-	padding: 20px 0;
 `;
 
 const Title = styled.h2`
 	color: #4c758b;
+	margin-top: 10px;
 `;
 
 const FoldersList = styled.ul`
@@ -302,7 +282,7 @@ const Icon = styled.svg`
 
 const InputSearch = styled.input`
 	display: block;
-	margin: 0 auto 15px;
+	margin: 0 auto;
 	width: 30%;
 	border-radius: 4px;
 	border: 1px solid #b6d9ee;

@@ -65,6 +65,8 @@ const FileSystem: FC = () => {
 
 				<Folders parentId={currentFolderId} serchName={serchName} setParentFolders={setParentFolders} />
 
+				<Devider />
+
 				<Files folderId={currentFolderId} serchName={serchName} />
 			</FileSystemStyled>
 		</Container>
@@ -97,4 +99,10 @@ const InputSearch = styled.input`
 	&:focus {
 		border-color: #4c758b;
 	}
+`;
+
+const Devider = styled.div`
+	width: 100%;
+	height: 1px;
+	background-color: #4c758b;
 `;

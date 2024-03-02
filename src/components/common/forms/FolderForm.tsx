@@ -1,10 +1,12 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 
 import Checkbox from "../Checkbox";
 import Input from "../Input";
 import { Button } from "../Button";
+import Modal from "../Modal";
+import ConfirmationForm from "./ConfirmationForm";
 
 import { IFolderFormValues } from "../../../interfaces/folders";
 
@@ -17,6 +19,8 @@ interface IProps {
 }
 
 const FolderForm: FC<IProps> = ({ initialFolder, isOwner, isLoading, onSaveClick, onCancelClick }) => {
+	const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
 	const {
 		register,
 		handleSubmit,
@@ -28,32 +32,55 @@ const FolderForm: FC<IProps> = ({ initialFolder, isOwner, isLoading, onSaveClick
 		},
 	});
 
+	const onDeleteBtnClick = () => setIsConfirmModalOpen(true);
+	const confirmationModalClose = () => setIsConfirmModalOpen(false);
+
+	const handleDeleteFolder = () => {};
+
 	return (
-		<FormStyled onSubmit={handleSubmit(onSaveClick)}>
-			{isOwner && (
-				<LabelIsPublick>
-					<Checkbox name="isPublick" register={register} />
-					<span>Is Publick</span>
-				</LabelIsPublick>
+		<>
+			<FormStyled onSubmit={handleSubmit(onSaveClick)}>
+				{isOwner && (
+					<LabelIsPublick>
+						<Checkbox name="isPublick" register={register} />
+						<span>Is Publick</span>
+					</LabelIsPublick>
+				)}
+
+				<Input
+					type="text"
+					name="name"
+					label={<NameLabel>Name</NameLabel>}
+					placeholder="Name"
+					register={register}
+					rules={{ required: { value: true, message: "Required" } }}
+					error={errors.name}
+				/>
+
+				<ButtonWrapper>
+					<Button disabled={isLoading}>Save</Button>
+					<Button type="button" disabled={isLoading} onClick={onCancelClick}>
+						Cancel
+					</Button>
+
+					{initialFolder && isOwner && (
+						<Button type="button" disabled={isLoading} onClick={onDeleteBtnClick}>
+							Delete
+						</Button>
+					)}
+				</ButtonWrapper>
+			</FormStyled>
+
+			{isConfirmModalOpen && initialFolder && (
+				<Modal onModalClose={confirmationModalClose}>
+					<ConfirmationForm
+						message={`Do you want to delete a folder "${initialFolder.name}" with all internal files?`}
+						onConfirmClick={handleDeleteFolder}
+						onCancelClick={confirmationModalClose}
+					/>
+				</Modal>
 			)}
-
-			<Input
-				type="text"
-				name="name"
-				label={<NameLabel>Name</NameLabel>}
-				placeholder="Name"
-				register={register}
-				rules={{ required: { value: true, message: "Required" } }}
-				error={errors.name}
-			/>
-
-			<ButtonWrapper>
-				<Button disabled={isLoading}>Save</Button>
-				<Button type="button" disabled={isLoading} onClick={onCancelClick}>
-					Cancel
-				</Button>
-			</ButtonWrapper>
-		</FormStyled>
+		</>
 	);
 };
 

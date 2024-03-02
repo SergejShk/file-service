@@ -14,8 +14,9 @@ export const ButtonCross = styled.button`
 	transition: background-color 0.2s ease;
 `;
 
-export const Button = styled.button<{ $minHeight?: string }>`
+export const Button = styled.button<{ $minHeight?: string; $minWidth?: string }>`
 	min-height: ${({ $minHeight }) => $minHeight || ""};
+	min-width: ${({ $minWidth }) => $minWidth || ""};
 	cursor: pointer;
 	display: flex;
 	align-items: center;

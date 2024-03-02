@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
@@ -10,6 +10,8 @@ import { Button } from "../Button";
 import { useFiles } from "../../../hooks/useFiles";
 
 import { IFilesFormValues } from "../../../interfaces/files";
+import Modal from "../Modal";
+import ConfirmationForm from "./ConfirmationForm";
 
 interface IProps {
 	initialFile?: IFilesFormValues;
@@ -20,6 +22,8 @@ interface IProps {
 }
 
 const FilesForm: FC<IProps> = ({ initialFile, isOwner, isLoading, onSaveClick, onCancelClick }) => {
+	const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
 	const { uploadedFile, uploadErrors, isUploadLoading, handleFileUpload, setUploadErrors, handleOnDrop } =
 		useFiles();
 	const { getRootProps, getInputProps } = useDropzone({ onDrop: handleOnDrop, noClick: true });
@@ -77,6 +81,11 @@ const FilesForm: FC<IProps> = ({ initialFile, isOwner, isLoading, onSaveClick, o
 		resetErrors();
 	};
 
+	const onDeleteBtnClick = () => setIsConfirmModalOpen(true);
+	const confirmationModalClose = () => setIsConfirmModalOpen(false);
+
+	const handleDeleteFolder = () => {};
+
 	const isLoad = isUploadLoading || isLoading;
 
 	return (
@@ -117,9 +126,25 @@ const FilesForm: FC<IProps> = ({ initialFile, isOwner, isLoading, onSaveClick, o
 						<Button type="button" disabled={isLoading} onClick={onCancelClick}>
 							Cancel
 						</Button>
+
+						{initialFile && isOwner && (
+							<Button type="button" disabled={isLoading} onClick={onDeleteBtnClick}>
+								Delete
+							</Button>
+						)}
 					</ButtonWrapper>
 				</FilesFormStyled>
 			</DropzoneUploaderStyled>
+
+			{isConfirmModalOpen && initialFile && (
+				<Modal onModalClose={confirmationModalClose}>
+					<ConfirmationForm
+						message={`Do you want to delete a "${initialFile.name}" file?`}
+						onConfirmClick={handleDeleteFolder}
+						onCancelClick={confirmationModalClose}
+					/>
+				</Modal>
+			)}
 		</>
 	);
 };

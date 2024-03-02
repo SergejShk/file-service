@@ -226,6 +226,7 @@ const FoldersList = styled.ul`
 	align-items: flex-start;
 	gap: 10px;
 	flex-wrap: wrap;
+	padding-bottom: 10px;
 `;
 
 const FoldersItem = styled.li`

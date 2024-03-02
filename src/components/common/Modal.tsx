@@ -1,6 +1,8 @@
 import { FC, ReactNode, useEffect } from "react";
 import styled from "styled-components";
 
+import { Portal } from "./Portal";
+
 interface IProps {
 	height?: string;
 	children: ReactNode;
@@ -35,11 +37,13 @@ const Modal: FC<IProps> = ({ height, children, onModalClose }) => {
 	};
 
 	return (
-		<Backdrop onClick={onBackdropClick}>
-			<ModalWrapper onClick={onBackdropClick}>
-				<ModalStyled $height={height}>{children}</ModalStyled>
-			</ModalWrapper>
-		</Backdrop>
+		<Portal>
+			<Backdrop onClick={onBackdropClick}>
+				<ModalWrapper onClick={onBackdropClick}>
+					<ModalStyled $height={height}>{children}</ModalStyled>
+				</ModalWrapper>
+			</Backdrop>
+		</Portal>
 	);
 };
 

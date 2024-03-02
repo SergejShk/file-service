@@ -46,3 +46,8 @@ export interface IFileUpdateBody {
 	name: string;
 	isPublick: boolean;
 }
+
+export interface IUpdateFileEditorsBody {
+	id: number;
+	editorsIds: number[];
+}

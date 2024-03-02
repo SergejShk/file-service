@@ -3,6 +3,7 @@ import styled from "styled-components";
 
 import Modal from "../common/Modal";
 import FilesForm from "../common/forms/FilesForm";
+import PermissionForm from "../common/forms/PermissionForm";
 import Loader from "../common/Loader";
 
 import { getFileApi } from "../../services/files/getFile";
@@ -12,6 +13,7 @@ import { useAuthContext } from "../../context/AuthContext";
 import { useNewFile } from "../../hooks/mutations/files/useNewFile";
 import { useFilesByFolder } from "../../hooks/mutations/files/useGetFilesByFolder";
 import { useUpdateFile } from "../../hooks/mutations/files/useUpdateFile";
+import { useUpdateFileEditors } from "../../hooks/mutations/files/useUpdateFileEditors";
 
 import { EModal } from "../../interfaces/common";
 import { IFileApi, IFilesFormValues } from "../../interfaces/files";
@@ -30,6 +32,11 @@ const Files: FC<IProps> = ({ folderId }) => {
 	const { data: filesByFolders, isFetching } = useFilesByFolder(folderId, "");
 	const { mutate: createNewFile, data: newFile, isPending: isPendingNewFile } = useNewFile();
 	const { mutate: updateFile, data: updatedFile, isPending: isPendingUpdateFile } = useUpdateFile();
+	const {
+		mutate: updateEditors,
+		data: updatedFileEditors,
+		isPending: isPendingUpdateEditors,
+	} = useUpdateFileEditors();
 
 	const updateFiles = (newFile: IFileApi) =>
 		setFiles((prev) =>
@@ -62,6 +69,13 @@ const Files: FC<IProps> = ({ folderId }) => {
 		onModalClose();
 	}, [updatedFile]);
 
+	useEffect(() => {
+		if (!updatedFileEditors?.data) return;
+
+		updateFiles(updatedFileEditors.data);
+		onModalClose();
+	}, [updatedFileEditors]);
+
 	const onModalClose = () => setModal(null);
 
 	const handleSaveFilesForm = (formValues: IFilesFormValues) => {
@@ -93,6 +107,13 @@ const Files: FC<IProps> = ({ folderId }) => {
 				setSelectedFile(file);
 				break;
 		}
+	};
+
+	const handleSavePermissionsForm = (editors: number[]) => {
+		if (!selectedFile?.id) return;
+
+		const id = selectedFile.id;
+		updateEditors({ id, editorsIds: editors });
 	};
 
 	const onFileClick = async (file: IFileApi) => {
@@ -172,6 +193,19 @@ const Files: FC<IProps> = ({ folderId }) => {
 						isOwner={auth.id === selectedFile.userId}
 						isLoading={isPendingUpdateFile}
 						onSaveClick={handleSaveFilesForm}
+						onCancelClick={onModalClose}
+					/>
+				</Modal>
+			)}
+
+			{modal === EModal.Permission && !!selectedFile && (
+				<Modal onModalClose={onModalClose}>
+					<PermissionForm
+						initialEditors={selectedFile.editorsIds}
+						ownerId={auth.id}
+						entityName={selectedFile.name}
+						isLoading={isPendingUpdateEditors}
+						onSaveClick={handleSavePermissionsForm}
 						onCancelClick={onModalClose}
 					/>
 				</Modal>

@@ -105,7 +105,7 @@ const FilesForm: FC<IProps> = ({ initialFile, isOwner, isLoading, onSaveClick, o
 						)}
 					</FileInputWrapper>
 
-					<DropzonePlaceholder>Drop files to upload</DropzonePlaceholder>
+					{!initialFile && <DropzonePlaceholder>Drop files to upload</DropzonePlaceholder>}
 
 					{!isLoading && !initialFile && <input {...getInputProps()} />}
 					{!isLoading && !initialFile && (

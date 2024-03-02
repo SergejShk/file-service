@@ -1,5 +1,4 @@
-import { ChangeEvent, FC, useEffect, useState } from "react";
-import debounce from "lodash.debounce";
+import { FC, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import Modal from "../common/Modal";
@@ -19,13 +18,13 @@ import { IFolder, IFolderFormValues } from "../../interfaces/folders";
 
 interface IProps {
 	parentId: number;
+	serchName: string;
 	setParentFolders: React.Dispatch<React.SetStateAction<IFolder[]>>;
 }
 
-const Folders: FC<IProps> = ({ parentId, setParentFolders }) => {
+const Folders: FC<IProps> = ({ parentId, serchName, setParentFolders }) => {
 	const { auth } = useAuthContext();
 
-	const [serchName, setSearchName] = useState("");
 	const [folders, setFolders] = useState<IFolder[]>([]);
 	const [modal, setModal] = useState<EModal | null>(null);
 	const [selectedFolder, setSelectedFolder] = useState<IFolder | undefined>(undefined);
@@ -120,26 +119,10 @@ const Folders: FC<IProps> = ({ parentId, setParentFolders }) => {
 		setParentFolders((prev) => [...prev, folder]);
 	};
 
-	const updateSearchValue = debounce((value: string) => {
-		setSearchName(value);
-	}, 500);
-
-	const handleSearchInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-		updateSearchValue(e.target.value);
-	};
-
 	const hasFolders = folders.length > 0 && !isFetching;
 
 	return (
 		<FoldersStyled>
-			<InputSearch
-				name="name"
-				type="text"
-				placeholder="Type..."
-				onChange={handleSearchInputChange}
-				autoComplete="off"
-			/>
-
 			<Title>Folders</Title>
 
 			<FoldersList>
@@ -270,26 +253,6 @@ const Button = styled.button`
 
 const Icon = styled.svg`
 	fill: #d1c847;
-`;
-
-const InputSearch = styled.input`
-	display: block;
-	margin: 0 auto;
-	width: 30%;
-	border-radius: 4px;
-	border: 1px solid #b6d9ee;
-	background-color: #fff;
-	font-size: 18px;
-	line-height: normal;
-	letter-spacing: 0.72px;
-	color: #484848;
-	outline: none;
-	padding: 10px;
-
-	&:hover,
-	&:focus {
-		border-color: #4c758b;
-	}
 `;
 
 const FolderTitle = styled.div`

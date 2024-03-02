@@ -20,16 +20,17 @@ import { IFileApi, IFilesFormValues } from "../../interfaces/files";
 
 interface IProps {
 	folderId: number;
+	serchName: string;
 }
 
-const Files: FC<IProps> = ({ folderId }) => {
+const Files: FC<IProps> = ({ folderId, serchName }) => {
 	const { auth } = useAuthContext();
 
 	const [files, setFiles] = useState<IFileApi[]>([]);
 	const [selectedFile, setSelectedFile] = useState<IFileApi | undefined>(undefined);
 	const [modal, setModal] = useState<EModal | null>(null);
 
-	const { data: filesByFolders, isFetching } = useFilesByFolder(folderId, "");
+	const { data: filesByFolders, isFetching } = useFilesByFolder(folderId, serchName);
 	const { mutate: createNewFile, data: newFile, isPending: isPendingNewFile } = useNewFile();
 	const { mutate: updateFile, data: updatedFile, isPending: isPendingUpdateFile } = useUpdateFile();
 	const {

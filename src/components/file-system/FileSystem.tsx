@@ -1,4 +1,5 @@
-import { FC, useMemo, useState } from "react";
+import { ChangeEvent, FC, useMemo, useState } from "react";
+import debounce from "lodash.debounce";
 import styled from "styled-components";
 
 import { Container } from "../common/Container";
@@ -12,6 +13,7 @@ import { IFolder } from "../../interfaces/folders";
 
 const FileSystem: FC = () => {
 	const [parentFolders, setParentFolders] = useState<IFolder[]>([]);
+	const [serchName, setSearchName] = useState("");
 
 	const currentFolderId = useMemo(() => {
 		if (parentFolders.length > 0) {
@@ -36,6 +38,14 @@ const FileSystem: FC = () => {
 		});
 	};
 
+	const updateSearchValue = debounce((value: string) => {
+		setSearchName(value);
+	}, 500);
+
+	const handleSearchInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+		updateSearchValue(e.target.value);
+	};
+
 	return (
 		<Container>
 			<FileSystemStyled>
@@ -45,9 +55,17 @@ const FileSystem: FC = () => {
 					onCrumbsClick={onCrumbsClick}
 				/>
 
-				<Folders parentId={currentFolderId} setParentFolders={setParentFolders} />
+				<InputSearch
+					name="name"
+					type="text"
+					placeholder="Type..."
+					onChange={handleSearchInputChange}
+					autoComplete="off"
+				/>
 
-				<Files folderId={currentFolderId} />
+				<Folders parentId={currentFolderId} serchName={serchName} setParentFolders={setParentFolders} />
+
+				<Files folderId={currentFolderId} serchName={serchName} />
 			</FileSystemStyled>
 		</Container>
 	);
@@ -59,4 +77,24 @@ const FileSystemStyled = styled.div`
 	width: 100%;
 	display: flex;
 	flex-direction: column;
+`;
+
+const InputSearch = styled.input`
+	display: block;
+	margin: 0 auto;
+	width: 30%;
+	border-radius: 4px;
+	border: 1px solid #b6d9ee;
+	background-color: #fff;
+	font-size: 18px;
+	line-height: normal;
+	letter-spacing: 0.72px;
+	color: #484848;
+	outline: none;
+	padding: 10px;
+
+	&:hover,
+	&:focus {
+		border-color: #4c758b;
+	}
 `;

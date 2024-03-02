@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 
@@ -8,18 +8,30 @@ import { Button } from "../Button";
 import Modal from "../Modal";
 import ConfirmationForm from "./ConfirmationForm";
 
-import { IFolderFormValues } from "../../../interfaces/folders";
+import { useDeleteFolder } from "../../../hooks/mutations/folders/useDeleteFolder";
+
+import { IFolder, IFolderFormValues } from "../../../interfaces/folders";
 
 interface IProps {
-	initialFolder?: IFolderFormValues;
+	initialFolder?: IFolder;
 	isOwner: boolean;
 	isLoading: boolean;
 	onSaveClick: (values: IFolderFormValues) => void;
 	onCancelClick: () => void;
+	deleteFolderFromState?: (id: number) => void;
 }
 
-const FolderForm: FC<IProps> = ({ initialFolder, isOwner, isLoading, onSaveClick, onCancelClick }) => {
+const FolderForm: FC<IProps> = ({
+	initialFolder,
+	isOwner,
+	isLoading,
+	onSaveClick,
+	onCancelClick,
+	deleteFolderFromState,
+}) => {
 	const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
+	const { mutate: deleteFolder, data, isPending } = useDeleteFolder();
 
 	const {
 		register,
@@ -32,10 +44,22 @@ const FolderForm: FC<IProps> = ({ initialFolder, isOwner, isLoading, onSaveClick
 		},
 	});
 
+	useEffect(() => {
+		if (!data?.data || !initialFolder || !deleteFolderFromState) return;
+
+		setIsConfirmModalOpen(false);
+		deleteFolderFromState(initialFolder?.id);
+		onCancelClick();
+	}, [data, deleteFolderFromState, initialFolder, onCancelClick]);
+
 	const onDeleteBtnClick = () => setIsConfirmModalOpen(true);
 	const confirmationModalClose = () => setIsConfirmModalOpen(false);
 
-	const handleDeleteFolder = () => {};
+	const handleDeleteFolder = () => {
+		if (!initialFolder) return;
+
+		deleteFolder(initialFolder.id);
+	};
 
 	return (
 		<>
@@ -77,6 +101,7 @@ const FolderForm: FC<IProps> = ({ initialFolder, isOwner, isLoading, onSaveClick
 						message={`Do you want to delete a folder "${initialFolder.name}" with all internal files?`}
 						onConfirmClick={handleDeleteFolder}
 						onCancelClick={confirmationModalClose}
+						isLoading={isPending}
 					/>
 				</Modal>
 			)}

@@ -103,7 +103,7 @@ const FilesForm: FC<IProps> = ({
 	const onDeleteBtnClick = () => setIsConfirmModalOpen(true);
 	const confirmationModalClose = () => setIsConfirmModalOpen(false);
 
-	const handleDeleteFolder = () => {
+	const handleDeleteFile = () => {
 		if (!initialFile) return;
 
 		const body = { id: initialFile.id, key: initialFile.key };
@@ -165,7 +165,7 @@ const FilesForm: FC<IProps> = ({
 					<ConfirmationForm
 						message={`Do you want to delete a "${initialFile.name}" file?`}
 						isLoading={isPending}
-						onConfirmClick={handleDeleteFolder}
+						onConfirmClick={handleDeleteFile}
 						onCancelClick={confirmationModalClose}
 					/>
 				</Modal>

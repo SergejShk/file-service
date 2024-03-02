@@ -119,6 +119,9 @@ const Folders: FC<IProps> = ({ parentId, serchName, setParentFolders }) => {
 		setParentFolders((prev) => [...prev, folder]);
 	};
 
+	const deleteFolderFromState = (id: number) =>
+		setFolders((prev) => prev.filter((folder) => folder.id !== id));
+
 	const hasFolders = folders.length > 0 && !isFetching;
 
 	return (
@@ -189,6 +192,7 @@ const Folders: FC<IProps> = ({ parentId, serchName, setParentFolders }) => {
 						isLoading={isPendingUpdateFolder}
 						onSaveClick={handleSaveFolderForm}
 						onCancelClick={onModalClose}
+						deleteFolderFromState={deleteFolderFromState}
 					/>
 				</Modal>
 			)}

@@ -115,6 +115,7 @@ const ButtonWrapper = styled.div`
 	display: flex;
 	justify-content: flex-end;
 	gap: 15px;
+	margin-top: 10px;
 `;
 
 const UsersList = styled.ul`

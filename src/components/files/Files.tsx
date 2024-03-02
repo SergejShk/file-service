@@ -125,6 +125,8 @@ const Files: FC<IProps> = ({ folderId, serchName }) => {
 		window.open(response.data, "_blank");
 	};
 
+	const deleteFileFromState = (id: number) => setFiles((prev) => prev.filter((file) => file.id !== id));
+
 	const hasFiles = files.length > 0 && !isFetching;
 
 	return (
@@ -195,6 +197,7 @@ const Files: FC<IProps> = ({ folderId, serchName }) => {
 						isLoading={isPendingUpdateFile}
 						onSaveClick={handleSaveFilesForm}
 						onCancelClick={onModalClose}
+						deleteFileFromState={deleteFileFromState}
 					/>
 				</Modal>
 			)}

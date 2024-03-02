@@ -3,30 +3,41 @@ import { useForm } from "react-hook-form";
 import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
 
+import ConfirmationForm from "./ConfirmationForm";
+import Modal from "../Modal";
 import Input from "../Input";
 import Checkbox from "../Checkbox";
 import { Button } from "../Button";
 
 import { useFiles } from "../../../hooks/useFiles";
+import { useDeleteFile } from "../../../hooks/mutations/files/useDeleteFile";
 
-import { IFilesFormValues } from "../../../interfaces/files";
-import Modal from "../Modal";
-import ConfirmationForm from "./ConfirmationForm";
+import { IFileApi, IFilesFormValues } from "../../../interfaces/files";
 
 interface IProps {
-	initialFile?: IFilesFormValues;
+	initialFile?: IFileApi;
 	isOwner: boolean;
 	isLoading: boolean;
 	onSaveClick: (formValues: IFilesFormValues) => void;
 	onCancelClick: () => void;
+	deleteFileFromState?: (id: number) => void;
 }
 
-const FilesForm: FC<IProps> = ({ initialFile, isOwner, isLoading, onSaveClick, onCancelClick }) => {
+const FilesForm: FC<IProps> = ({
+	initialFile,
+	isOwner,
+	isLoading,
+	onSaveClick,
+	onCancelClick,
+	deleteFileFromState,
+}) => {
 	const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
 	const { uploadedFile, uploadErrors, isUploadLoading, handleFileUpload, setUploadErrors, handleOnDrop } =
 		useFiles();
 	const { getRootProps, getInputProps } = useDropzone({ onDrop: handleOnDrop, noClick: true });
+
+	const { mutate: deleteFile, data, isPending } = useDeleteFile();
 
 	const inputRef = useRef(null);
 
@@ -44,6 +55,14 @@ const FilesForm: FC<IProps> = ({ initialFile, isOwner, isLoading, onSaveClick, o
 			isPublick: initialFile?.isPublick || false,
 		},
 	});
+
+	useEffect(() => {
+		if (!data?.data || !initialFile || !deleteFileFromState) return;
+
+		setIsConfirmModalOpen(false);
+		deleteFileFromState(initialFile?.id);
+		onCancelClick();
+	}, [data, deleteFileFromState, initialFile, onCancelClick]);
 
 	useEffect(() => {
 		if (!uploadErrors) return;
@@ -84,7 +103,12 @@ const FilesForm: FC<IProps> = ({ initialFile, isOwner, isLoading, onSaveClick, o
 	const onDeleteBtnClick = () => setIsConfirmModalOpen(true);
 	const confirmationModalClose = () => setIsConfirmModalOpen(false);
 
-	const handleDeleteFolder = () => {};
+	const handleDeleteFolder = () => {
+		if (!initialFile) return;
+
+		const body = { id: initialFile.id, key: initialFile.key };
+		deleteFile(body);
+	};
 
 	const isLoad = isUploadLoading || isLoading;
 
@@ -140,6 +164,7 @@ const FilesForm: FC<IProps> = ({ initialFile, isOwner, isLoading, onSaveClick, o
 				<Modal onModalClose={confirmationModalClose}>
 					<ConfirmationForm
 						message={`Do you want to delete a "${initialFile.name}" file?`}
+						isLoading={isPending}
 						onConfirmClick={handleDeleteFolder}
 						onCancelClick={confirmationModalClose}
 					/>
@@ -167,6 +192,7 @@ const ButtonWrapper = styled.div`
 	display: flex;
 	justify-content: flex-end;
 	gap: 15px;
+	margin-top: 20px;
 `;
 
 const DropzoneUploaderStyled = styled.div`

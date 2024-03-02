@@ -51,3 +51,8 @@ export interface IUpdateFileEditorsBody {
 	id: number;
 	editorsIds: number[];
 }
+
+export interface IDeleteFileBody {
+	id: number;
+	key: string;
+}

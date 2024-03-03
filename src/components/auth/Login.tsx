@@ -1,12 +1,13 @@
 import { FC } from "react";
+import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 
+import GoogleLink from "../common/GoogleLink";
 import Input from "../common/Input";
 import { Button } from "../common/Button";
 
 import { useLogin } from "../../hooks/mutations/auth/useLogin";
-import { Link } from "react-router-dom";
 
 export interface FormValues {
 	email: string;
@@ -34,6 +35,8 @@ const Login: FC = () => {
 	return (
 		<LoginPageStyled>
 			<TitlePage>Log in</TitlePage>
+			<GoogleLink flow="login" />
+
 			<FormStyled onSubmit={handleSubmit(onSubmit)}>
 				<Input
 					type="text"

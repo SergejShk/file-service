@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 
+import GoogleLink from "../common/GoogleLink";
 import Input from "../common/Input";
 import { Button } from "../common/Button";
 
@@ -34,6 +35,7 @@ const SignUp: FC = () => {
 	return (
 		<SignUpStyled>
 			<TitlePage>Sign up</TitlePage>
+			<GoogleLink flow="signup" />
 
 			<FormStyled onSubmit={handleSubmit(onSubmit)}>
 				<Input
